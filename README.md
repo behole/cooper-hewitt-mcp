@@ -27,6 +27,13 @@ npm install
    ```
    COOPER_HEWITT_API_TOKEN=your_api_token_here
    ```
+4. Update your claude_desktop_config.json
+```bash
+"cooper-hewitt": {
+      "command": "node",
+      "args": ["path to your index.js"]
+    }
+```
 
 ## Available Tools
 
