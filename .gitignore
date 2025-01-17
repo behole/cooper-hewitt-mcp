@@ -1,0 +1,5 @@
+config.py
+*.env
+.env
+config.json
+node_modules/

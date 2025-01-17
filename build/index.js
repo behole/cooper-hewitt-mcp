@@ -1,10 +1,14 @@
+import 'dotenv/config'; // Add this at the top
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema, } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import fetch from 'node-fetch';
-const API_TOKEN = "358020d16d8de46af1aeac1e96be3cf2";
-const API_BASE = "https://api.collection.cooperhewitt.org/rest";
+const API_TOKEN = process.env.COOPER_HEWITT_API_TOKEN;
+if (!API_TOKEN) {
+    console.error('COOPER_HEWITT_API_TOKEN is not set in the environment');
+    process.exit(1);
+  }
 // Create server instance
 const server = new Server({
     name: "cooper-hewitt",
