@@ -68,7 +68,7 @@ node index.js
 Specify your license - e.g., MIT, Apache 2.0
 
 ## Contact
-[Your Name or Contact Information]
+[]
 
 ## Acknowledgments
 - Cooper Hewitt, Smithsonian Design Museum
