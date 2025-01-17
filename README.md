@@ -61,7 +61,7 @@ node index.js
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-##To-Do's (Very Much a WIP) ->
+## To-Do's (Very Much a WIP) ->
 - Fix image handingling in the artifacts on Claude Desktop
 
 ## License
