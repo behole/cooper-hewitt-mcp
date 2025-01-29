@@ -6,28 +6,10 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import fetch from 'node-fetch';
+import { CooperHewittObject } from './types';
 
 const API_TOKEN = "358020d16d8de46af1aeac1e96be3cf2";
 const API_BASE = "https://api.collection.cooperhewitt.org/rest";
-
-// Define types for API responses
-interface CooperHewittImage {
-  b?: {
-    url: string;
-  };
-}
-
-interface CooperHewittObject {
-  id: string;
-  title: string;
-  medium: string;
-  date: string;
-  department: string;
-  description?: string;
-  creditline?: string;
-  dimensions?: string;
-  images?: CooperHewittImage[];
-}
 
 interface SearchResponse {
   objects: CooperHewittObject[];
@@ -135,20 +117,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       });
 
       const objects = response.objects || [];
-      const formattedResults = objects.map((obj) => ({
-        id: obj.id,
-        title: obj.title,
-        medium: obj.medium,
-        date: obj.date,
-        department: obj.department,
-        images: obj.images?.[0]?.b?.url || "No image available",
-      }));
 
+      // Return search results using ObjectsGrid component
       return {
+        artifact: {
+          type: "application/vnd.ant.react",
+          content: {
+            component: "ObjectsGrid",
+            props: { objects }
+          }
+        },
         content: [
           {
             type: "text",
-            text: JSON.stringify(formattedResults, null, 2),
+            text: `Found ${objects.length} objects matching "${query}"`,
           },
         ],
       };
@@ -162,23 +144,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       });
 
       const object = response.object;
-      const formattedObject = {
-        id: object.id,
-        title: object.title,
-        medium: object.medium,
-        date: object.date,
-        description: object.description,
-        department: object.department,
-        creditline: object.creditline,
-        dimensions: object.dimensions,
-        images: object.images?.[0]?.b?.url || "No image available",
-      };
 
+      // Return object details using ObjectDisplay component
       return {
+        artifact: {
+          type: "application/vnd.ant.react",
+          content: {
+            component: "ObjectDisplay",
+            props: { object }
+          }
+        },
         content: [
           {
             type: "text",
-            text: JSON.stringify(formattedObject, null, 2),
+            text: `Details for object: ${object.title}`,
           },
         ],
       };
@@ -207,4 +186,3 @@ async function main() {
 main().catch((error) => {
   console.error("Fatal error in main():", error);
   process.exit(1);
-});
