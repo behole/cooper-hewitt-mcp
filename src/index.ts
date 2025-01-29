@@ -56,12 +56,93 @@ async function makeApiRequest<T>(method: string, params: Record<string, any>): P
       throw new Error(`API request failed: ${response.statusText}`);
     }
 
-    return response.json() as Promise<T>;
+    const data = await response.json();
+    console.error('API Response:', JSON.stringify(data, null, 2));
+    return data as T;
   } catch (error) {
     console.error('API request error:', error);
     throw error;
   }
 }
+
+// Handle tool execution
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+
+  try {
+    if (name === "search-objects") {
+      const { query, page = 1, perPage = 10 } = SearchObjectsSchema.parse(args);
+      
+      console.error('Searching for:', query);
+      const response = await makeApiRequest<SearchResponse>("cooperhewitt.search.collection", {
+        query,
+        page: page.toString(),
+        per_page: perPage.toString(),
+      });
+
+      const objects = response.objects || [];
+      console.error('Found objects:', objects.length);
+      
+      if (objects.length > 0) {
+        console.error('First object:', JSON.stringify(objects[0], null, 2));
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Found ${objects.length} objects matching "${query}". ${objects.length > 0 ? `First object: ${objects[0].title}` : ''}`,
+          },
+        ],
+        artifact: objects.length > 0 ? {
+          type: "application/vnd.ant.react",
+          content: {
+            component: "ObjectsGrid",
+            props: { objects }
+          }
+        } : undefined
+      };
+    }
+
+    if (name === "get-object") {
+      const { id } = GetObjectSchema.parse(args);
+      
+      const response = await makeApiRequest<ObjectResponse>("cooperhewitt.objects.getInfo", {
+        object_id: id,
+      });
+
+      const object = response.object;
+
+      return {
+        artifact: {
+          type: "application/vnd.ant.react",
+          content: {
+            component: "ObjectDisplay",
+            props: { object }
+          }
+        },
+        content: [
+          {
+            type: "text",
+            text: `Details for object: ${object.title}`,
+          },
+        ],
+      };
+    }
+
+    throw new Error(`Unknown tool: ${name}`);
+  } catch (error) {
+    console.error('Error in request handler:', error);
+    if (error instanceof z.ZodError) {
+      throw new Error(
+        `Invalid arguments: ${error.errors
+          .map((e) => `${e.path.join(".")}: ${e.message}`)
+          .join(", ")}`
+      );
+    }
+    throw error;
+  }
+});
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -105,84 +186,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
     ],
   };
-});
-
-// Handle tool execution
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-
-  try {
-    if (name === "search-objects") {
-      const { query, page = 1, perPage = 10 } = SearchObjectsSchema.parse(args);
-      
-      console.error('Searching for:', query);
-      const response = await makeApiRequest<SearchResponse>("cooperhewitt.search.collection", {
-        query,
-        page: page.toString(),
-        per_page: perPage.toString(),
-      });
-
-      const objects = response.objects || [];
-      console.error('Found objects:', objects.length);
-      
-      if (objects.length > 0) {
-        console.error('First object title:', objects[0].title);
-      }
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Found ${objects.length} objects matching "${query}"`,
-          },
-        ],
-        artifact: {
-          type: "application/vnd.ant.react",
-          content: {
-            component: "ObjectsGrid",
-            props: { objects }
-          }
-        }
-      };
-    }
-
-    if (name === "get-object") {
-      const { id } = GetObjectSchema.parse(args);
-      
-      const response = await makeApiRequest<ObjectResponse>("cooperhewitt.objects.getInfo", {
-        object_id: id,
-      });
-
-      const object = response.object;
-
-      return {
-        artifact: {
-          type: "application/vnd.ant.react",
-          content: {
-            component: "ObjectDisplay",
-            props: { object }
-          }
-        },
-        content: [
-          {
-            type: "text",
-            text: `Details for object: ${object.title}`,
-          },
-        ],
-      };
-    }
-
-    throw new Error(`Unknown tool: ${name}`);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      throw new Error(
-        `Invalid arguments: ${error.errors
-          .map((e) => `${e.path.join(".")}: ${e.message}`)
-          .join(", ")}`
-      );
-    }
-    throw error;
-  }
 });
 
 // Start the server
