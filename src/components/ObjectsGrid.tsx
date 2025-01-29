@@ -15,6 +15,8 @@ const ObjectsGrid: React.FC<ObjectsGridProps> = ({ objects }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 max-h-screen">
       {displayObjects.map((object) => {
+        // Try title_raw first, then fall back to title
+        const title = object.title_raw || object.title || 'Untitled';
         const imageUrl = object.images?.[0]?.b?.url;
         
         return (
@@ -24,12 +26,12 @@ const ObjectsGrid: React.FC<ObjectsGridProps> = ({ objects }) => {
                 <div className="relative h-40 mb-2">
                   <img
                     src={imageUrl}
-                    alt={object.title || 'Object image'}
+                    alt={title}
                     className="object-cover w-full h-full rounded"
                   />
                 </div>
               )}
-              <h3 className="text-sm font-medium truncate">{object.title}</h3>
+              <h3 className="text-sm font-medium truncate">{title}</h3>
               {object.date && (
                 <p className="text-xs text-gray-500">{object.date}</p>
               )}
