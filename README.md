@@ -3,6 +3,8 @@
 ## Description
 A Model Context Protocol (MCP) server for interacting with the Cooper Hewitt Museum's collection API. This tool allows searching and retrieving detailed information about museum objects programmatically.
 
+<a href="https://glama.ai/mcp/servers/hwkfkqvpq7"><img width="380" height="200" src="https://glama.ai/mcp/servers/hwkfkqvpq7/badge" alt="cooper-hewitt-mcp MCP server" /></a>
+
 ## Prerequisites
 - Node.js (version 16+ recommended)
 - npm (Node Package Manager)
