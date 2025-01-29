@@ -6,7 +6,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import fetch from 'node-fetch';
-import { CooperHewittObject } from './types';
+import { CooperHewittObject } from './types.js';
 
 const API_TOKEN = "358020d16d8de46af1aeac1e96be3cf2";
 const API_BASE = "https://api.collection.cooperhewitt.org/rest";
