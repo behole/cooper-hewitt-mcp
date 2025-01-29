@@ -9,16 +9,19 @@ interface ObjectsGridProps {
 const ObjectsGrid: React.FC<ObjectsGridProps> = ({ objects }) => {
   if (!objects || objects.length === 0) return null;
 
+  // Only take first 6 objects to ensure they fit in viewport
+  const displayObjects = objects.slice(0, 6);
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {objects.map((object) => {
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 max-h-screen">
+      {displayObjects.map((object) => {
         const imageUrl = object.images?.[0]?.b?.url;
         
         return (
-          <Card key={object.id} className="w-full">
-            <CardContent className="p-4">
+          <Card key={object.id} className="flex flex-col h-64">
+            <CardContent className="flex-1 p-4">
               {imageUrl && (
-                <div className="relative w-full h-48 mb-2">
+                <div className="relative h-40 mb-2">
                   <img
                     src={imageUrl}
                     alt={object.title || 'Object image'}
@@ -26,9 +29,9 @@ const ObjectsGrid: React.FC<ObjectsGridProps> = ({ objects }) => {
                   />
                 </div>
               )}
-              <h3 className="text-lg font-medium truncate">{object.title}</h3>
+              <h3 className="text-sm font-medium truncate">{object.title}</h3>
               {object.date && (
-                <p className="text-sm text-gray-500">{object.date}</p>
+                <p className="text-xs text-gray-500">{object.date}</p>
               )}
             </CardContent>
           </Card>
