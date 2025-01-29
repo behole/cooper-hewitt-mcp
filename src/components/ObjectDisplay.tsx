@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CooperHewittObject } from '../types';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.js';
+import { CooperHewittObject } from '../types.js';
 
 interface ObjectDisplayProps {
   object: CooperHewittObject;
