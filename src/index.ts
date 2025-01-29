@@ -44,18 +44,23 @@ const GetObjectSchema = z.object({
 });
 
 async function makeApiRequest<T>(method: string, params: Record<string, any>): Promise<T> {
-  const urlParams = new URLSearchParams({
-    access_token: API_TOKEN,
-    method,
-    ...params,
-  });
+  try {
+    const urlParams = new URLSearchParams({
+      access_token: API_TOKEN,
+      method,
+      ...params,
+    });
 
-  const response = await fetch(`${API_BASE}/?${urlParams}`);
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`);
+    const response = await fetch(`${API_BASE}/?${urlParams}`);
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    return response.json() as Promise<T>;
+  } catch (error) {
+    console.error('API request error:', error);
+    throw error;
   }
-
-  return response.json() as Promise<T>;
 }
 
 // List available tools
