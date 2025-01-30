@@ -1,5 +1,4 @@
 import React from 'react';
-import { Card, CardContent } from './ui/card.js';
 import { CooperHewittObject } from '../types.js';
 
 interface ObjectDisplayProps {
@@ -11,8 +10,8 @@ const ObjectDisplay: React.FC<ObjectDisplayProps> = ({ object }) => {
   const imageData = object.images?.[0];
 
   return (
-    <Card className="max-w-2xl">
-      <CardContent className="p-6">
+    <div className="max-w-2xl rounded-lg border shadow-sm">
+      <div className="p-6">
         <div className="space-y-4">
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">{title}</h2>
@@ -66,8 +65,8 @@ const ObjectDisplay: React.FC<ObjectDisplayProps> = ({ object }) => {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
