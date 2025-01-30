@@ -1,24 +1,23 @@
 {
   "name": "cooper-hewitt-mcp",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Cooper Hewitt MCP Server",
   "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node build/index.js"
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/index.js', '755')\"",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.1.1",
+    "@modelcontextprotocol/sdk": "^1.0.1",
     "node-fetch": "^3.3.2",
-    "zod": "^3.24.1"
+    "react": "^18.2.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/node": "^22.10.7",
-    "@types/node-fetch": "^2.6.12",
-    "typescript": "^5.7.3"
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.47",
+    "typescript": "^5.3.3"
   }
 }
