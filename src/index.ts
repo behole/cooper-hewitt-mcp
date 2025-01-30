@@ -67,8 +67,8 @@ async function makeApiRequest<T>(method: string, params: Record<string, any>): P
 }
 
 async function fetchObjectImages(objects: CooperHewittObject[]): Promise<CooperHewittObject[]> {
-  // Process objects in parallel with a maximum of 5 concurrent requests
-  const batchSize = 5;
+  // Process objects in parallel with a maximum of 3 concurrent requests
+  const batchSize = 3;
   const results = [];
   
   for (let i = 0; i < objects.length; i += batchSize) {
@@ -76,9 +76,13 @@ async function fetchObjectImages(objects: CooperHewittObject[]): Promise<CooperH
     const promises = batch.map(async (object) => {
       const imageUrl = object.images?.[0]?.b?.url;
       if (imageUrl) {
-        const base64Data = await fetchImageAsBase64(imageUrl);
-        if (base64Data && object.images?.[0]) {
-          object.images[0].base64Data = base64Data;
+        try {
+          const base64Data = await fetchImageAsBase64(imageUrl);
+          if (base64Data && object.images?.[0]) {
+            object.images[0].base64Data = base64Data;
+          }
+        } catch (error) {
+          console.error(`Error fetching image for object ${object.id}:`, error);
         }
       }
       return object;
@@ -109,6 +113,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const objects = response.objects || [];
       console.error('Found objects:', objects.length);
       
+      if (objects.length > 0) {
+        console.error('First object:', JSON.stringify(objects[0], null, 2));
+      }
+
       // Fetch and process images for each object
       const objectsWithImages = await fetchObjectImages(objects);
 
@@ -150,7 +158,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: "text",
-            text: `Details for object: ${object.title}`,
+            text: `Details for object: ${object.title || object.title_raw || 'Untitled'}`,
           },
         ],
       };
