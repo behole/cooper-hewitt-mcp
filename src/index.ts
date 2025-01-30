@@ -7,6 +7,7 @@ import {
 import { z } from "zod";
 import fetch from 'node-fetch';
 import { CooperHewittObject } from './types.js';
+import { fetchImageAsBase64 } from './utils/imageUtils.js';
 
 const API_TOKEN = "358020d16d8de46af1aeac1e96be3cf2";
 const API_BASE = "https://api.collection.cooperhewitt.org/rest";
@@ -65,6 +66,31 @@ async function makeApiRequest<T>(method: string, params: Record<string, any>): P
   }
 }
 
+async function fetchObjectImages(objects: CooperHewittObject[]): Promise<CooperHewittObject[]> {
+  // Process objects in parallel with a maximum of 5 concurrent requests
+  const batchSize = 5;
+  const results = [];
+  
+  for (let i = 0; i < objects.length; i += batchSize) {
+    const batch = objects.slice(i, i + batchSize);
+    const promises = batch.map(async (object) => {
+      const imageUrl = object.images?.[0]?.b?.url;
+      if (imageUrl) {
+        const base64Data = await fetchImageAsBase64(imageUrl);
+        if (base64Data && object.images?.[0]) {
+          object.images[0].base64Data = base64Data;
+        }
+      }
+      return object;
+    });
+    
+    const processedBatch = await Promise.all(promises);
+    results.push(...processedBatch);
+  }
+  
+  return results;
+}
+
 // Handle tool execution
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
@@ -83,22 +109,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const objects = response.objects || [];
       console.error('Found objects:', objects.length);
       
-      if (objects.length > 0) {
-        console.error('First object:', JSON.stringify(objects[0], null, 2));
-      }
+      // Fetch and process images for each object
+      const objectsWithImages = await fetchObjectImages(objects);
 
       return {
         content: [
           {
             type: "text",
-            text: `Found ${objects.length} objects matching "${query}". ${objects.length > 0 ? `First object: ${objects[0].title}` : ''}`,
+            text: `Found ${objects.length} objects matching "${query}".`,
           },
         ],
         artifact: objects.length > 0 ? {
           type: "application/vnd.ant.react",
           content: {
             component: "ObjectsGrid",
-            props: { objects }
+            props: { objects: objectsWithImages }
           }
         } : undefined
       };
@@ -112,13 +137,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       });
 
       const object = response.object;
+      const objectWithImage = (await fetchObjectImages([object]))[0];
 
       return {
         artifact: {
           type: "application/vnd.ant.react",
           content: {
             component: "ObjectDisplay",
-            props: { object }
+            props: { object: objectWithImage }
           }
         },
         content: [
