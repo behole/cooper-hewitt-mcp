@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { CooperHewittObject } from '../types';
+import { Card, CardContent } from './ui/card.js';
+import { CooperHewittObject } from '../types.js';
 
 interface ObjectsGridProps {
   objects: CooperHewittObject[];
